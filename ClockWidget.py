@@ -2,6 +2,7 @@
 
 import json
 import configparser
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QIcon, QPalette, QBrush, QShowEvent
 from PyQt5.QtCore import pyqtSignal, Qt, QDateTime, QTime
@@ -87,8 +88,15 @@ class ClockAddWidget(QWidget):
 
     def load_ini(self):
         config = configparser.ConfigParser()
-        config.read('config.ini')
-        self.alwaysResponse = (config.get('Response', 'Always') == 'True')
+        config_path = r'setting/config.ini'
+        config.read(config_path)
+        if os.path.exists(config_path) and config.has_section("Response"):
+            self.alwaysResponse = (config.get('Response', 'Always') == 'True')
+        else:
+            config.add_section("Response")    
+            config.set("Response", "Always", "True")
+            config.write(open(config_path, "w"))
+            self.alwaysResponse = True
 
 
 class ClockMessageWidget(QWidget):
