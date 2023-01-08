@@ -93,9 +93,20 @@ class ClockAddWidget(QWidget):
 
 class ClockMessageWidget(QWidget):
 
+    end_signal = pyqtSignal()
+
     def __init__(self):
         super(ClockMessageWidget, self).__init__()
         self.initUI()
 
     def initUI(self):
         pass
+
+    def close(self) -> bool:
+        print('关闭')
+        return super().close()
+
+    def hide(self) -> None:
+        print('隐藏')
+        # self.end_signal.emit()
+        return super().hide()

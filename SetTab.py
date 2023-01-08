@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import configparser
+import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -48,11 +49,20 @@ class SetTab(QTabWidget):
         super().showEvent(a0)
         self.load_ini()
         if self.alwaysResponse:
+            # 正常模式
             self.setWindowModality(Qt.NonModal)
         else:
+            # 阻止其他窗体相应
             self.setWindowModality(Qt.ApplicationModal)
         
     
     def load_ini(self):
-        self.config.read('config.ini')
-        self.alwaysResponse = (self.config.get('Response', 'Always') == 'True')
+        config_path = r'setting/config.ini'
+        self.config.read(config_path)
+        if os.path.exists(config_path):
+            if self.config.has_section('Response'):
+                self.alwaysResponse = (self.config.get('Response', 'Always') == 'True')
+            else:
+                self.alwaysResponse = False
+        else:
+            pass

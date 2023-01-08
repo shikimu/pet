@@ -6,6 +6,5 @@ music/
 __pycache__/
 others.py
 ClockThread.py
-config.ini
 slippedimage_study.py
 test.py

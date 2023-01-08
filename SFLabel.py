@@ -7,7 +7,7 @@ import platform
 from PyQt5.QtWidgets import QLabel, QMessageBox
 from PIL import Image, ImageQt
 from PyQt5.QtGui import QPixmap, QMouseEvent, QDragEnterEvent, QDragLeaveEvent, QDropEvent, QIcon
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtCore import pyqtSignal, QEvent
 
 class SFLabel(QLabel):
 
@@ -58,10 +58,8 @@ class SFLabel(QLabel):
 
     # 文件拖拽进入
     def dragEnterEvent(self, event: QDragEnterEvent):
-        event.setDropAction(Qt.MoveAction)
         if self.acceptDropDelete:
             self.setImage(self.dragUrl)
-            print(event.mimeData().text())
             event.accept()
         else:
             event.ignore()
@@ -99,11 +97,10 @@ class SFLabel(QLabel):
         if self.deleteToAshbin:
             if platform.system() == "Windows":
                 from win32com.shell import shell, shellcon
-                res = shell.SHFileOperation((0, shellcon.FO_DELETE, path, None, shellcon.FOF_SILENT | shellcon.FOF_ALLOWUNDO | shellcon.FOF_NOCONFIRMATION))
-                print(res)
+                print(platform.system())
             elif platform.system() == "Darwin":
                 import subprocess
-                # 会卡mac?也不一定
+                # 会卡mac
                 if os.path.exists(path):
                     absPath = os.path.abspath(path).replace("\\", "\\\\").replace('"','\\"')
                     cmd = ['osascript', '-e', 'tell app "Finder" to move {the POSIX file "' + absPath + '"} to trash']

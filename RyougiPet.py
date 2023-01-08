@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 import configparser
 
 from SFLabel import SFLabel
@@ -10,6 +11,8 @@ from PyQt5.QtGui import *
 from ClockThread import ClockThread
 
 class RyougiPet(QWidget):
+
+    config = configparser.ConfigParser()
 
     base_img = "1_new.png"
     base_eimg = "2_new.png"
@@ -22,6 +25,8 @@ class RyougiPet(QWidget):
 
     setting_signal = pyqtSignal()
     clock_signal = pyqtSignal()
+    quite_signal = pyqtSignal()
+
     def __init__(self):
         super(RyougiPet, self).__init__()
 
@@ -81,7 +86,7 @@ class RyougiPet(QWidget):
         mini_icon.setIcon(QIcon("icon.ico"))
 
         mQuitAction = QAction("退出", self, triggered=self.quit)
-        mQuitAction.setShortcut("Ctrl+Q")
+        # mQuitAction.setShortcut(QKeySequence("Ctrl+Q"))
         mSetAction = QAction("设置", self, triggered=self.setting)
 
         miniMenu = QMenu(self)
@@ -96,7 +101,7 @@ class RyougiPet(QWidget):
         setAction = QAction("设置", self, triggered=self.setting)
         clockAction = QAction("闹钟", self, triggered=self.clock)
         quitAction = QAction("退出", self, triggered=self.quit)
-        quitAction.setShortcut("Ctrl+Q")
+        # quitAction.setShortcut(QKeySequence("Ctrl+Q"))
         rightMenu.addActions([setAction, clockAction, quitAction])
 
         rightMenu.popup(QCursor.pos())
@@ -166,15 +171,31 @@ class RyougiPet(QWidget):
     def quit(self):
         self.close()
         sys.exit()
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print('退出')
+        self.quite_signal.emit()
+        return super().closeEvent(a0)
     
     # 配置装载
     def load_ini(self, label: SFLabel):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        label.setAcceptDrops(config.get('Delete', 'Drop') == "True")
-        label.acceptDropDelete = config.get('Delete', 'Drop') == "True"
-        label.deleteTip = config.get('Delete', 'Tip') == "True"
-        label.deleteToAshbin = config.get('Delete', 'ToAsh') == "True"
+        config_path = r'setting/config.ini'
+        self.config.read(config_path)
+        if os.path.exists(config_path) and self.config.has_section("Delete"):
+            label.setAcceptDrops(self.config.get('Delete', 'Drop') == "True")
+            label.acceptDropDelete = self.config.get('Delete', 'Drop') == "True"
+            label.deleteTip = self.config.get('Delete', 'Tip') == "True"
+            label.deleteToAshbin = self.config.get('Delete', 'ToAsh') == "True"
+        else:
+            self.config.add_section("Delete")    
+            self.config.set("Delete", "Drop", "True")
+            self.config.set("Delete", "Tip", "False")
+            self.config.set("Delete", "ToAsh", "True")
+            self.config.write(open(config_path, "w"))
+            label.setAcceptDrops(True)
+            label.acceptDropDelete = True
+            label.deleteTip = False
+            label.deleteToAshbin = True
 
 
         
