@@ -19,7 +19,7 @@ class SetTab(QTabWidget):
         # self.setGeometry(300,300,200,200)
         self.setWindowTitle("设置")
 
-        self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setAutoFillBackground(True)
         # 背景透明
         self.setAttribute(Qt.WA_TranslucentBackground, False)
@@ -59,10 +59,10 @@ class SetTab(QTabWidget):
     def load_ini(self):
         config_path = r'setting/config.ini'
         self.config.read(config_path)
-        if os.path.exists(config_path):
-            if self.config.has_section('Response'):
-                self.alwaysResponse = (self.config.get('Response', 'Always') == 'True')
-            else:
-                self.alwaysResponse = False
+        if os.path.exists(config_path) and self.config.has_section("Response"):
+            self.alwaysResponse = (self.config.get('Response', 'Always') == 'True')
         else:
-            pass
+            self.config.add_section("Response")    
+            self.config.set("Response", "Always", "True")
+            self.config.write(open(config_path, "w"))
+            self.alwaysResponse = False

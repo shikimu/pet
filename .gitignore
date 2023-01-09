@@ -8,3 +8,5 @@ others.py
 ClockThread.py
 slippedimage_study.py
 test.py
+logs.txt
+setting/clock.json

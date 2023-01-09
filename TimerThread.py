@@ -33,6 +33,10 @@ class TimerThread(QThread):
     clock_list = {
 
     }
+    
+    clock_item = {
+
+    }
 
     clock_signal = pyqtSignal()
 
@@ -114,6 +118,8 @@ class TimerThread(QThread):
             if self.playing_time >= 300:
                 # 停止音乐
                 self.clock_stop()
+            else:
+                self.clock_play(type=1)
         if self.all_time % 15 == 0:
             # self.clock_signal.emit()
             now_time = QDateTime.currentDateTime().toTime_t()
@@ -129,8 +135,8 @@ class TimerThread(QThread):
                     item['play'] = True
                     self.clock_save()
                     if not self.clock_playing:
-                        self.clock_play(item=item)
-                    break
+                        self.clock_item = item
+                        self.clock_play()
 
     # 闹钟变更存储
     def clock_save(self):
@@ -138,16 +144,17 @@ class TimerThread(QThread):
         with open(json_path, "w") as outfile:
             json.dump(self.clock_list, outfile)
 
-    # 闹钟
-    def clock_play(self, item):
-        hour = item['hour']
-        minute = item['minute']
-        remark = item['remake']
-        print("闹钟 {}:{} \n{}".format(hour, minute, remark))
-        # self.music_path = item['music']
+    # 闹钟 type： 0 首次播放 1 循环
+    def clock_play(self, type: int=0):
+        if type == 0:
+            hour = self.clock_item['hour']
+            minute = self.clock_item['minute']
+            remark = self.clock_item['remake']
+            print("闹钟 {}:{} \n{}".format(hour, minute, remark))
+            # self.music_path = self.clock_item['music']
+            self.clock_signal.emit()
+            self.clock_playing = True
         self.music_path = 'music/oblivious.mp3'
-        self.clock_signal.emit()
-        self.clock_playing = True
         try:
             mixer.music.load(self.music_path)
             if not mixer.music.get_busy():

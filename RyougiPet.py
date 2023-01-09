@@ -3,12 +3,12 @@
 import sys
 import os
 import configparser
+import platform
 
 from SFLabel import SFLabel
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from ClockThread import ClockThread
 
 class RyougiPet(QWidget):
 
@@ -67,18 +67,21 @@ class RyougiPet(QWidget):
         # self.base_label.setShortcutAutoRepeat(1000)
         self.setAutoFillBackground(True)
         # 背景透明
-        # Qt.FramelessWindowHint(无框) Qt.WindowStaysOnTopHint(置顶) Qt.SubWindow(无底) Qt.NoDropShadowWindowHint(默认阴影边界) Qt.Tool(背景透明、控件不透明需这个（未知）有bug， 响应其他后直接消失)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True) # 失效对于qwidget (也可能多出一层图？，设置后setstylesheet无效)原因未知 windows用这个设置透明
+        # Qt.FramelessWindowHint(无框) Qt.WindowStaysOnTopHint(置顶) Qt.SubWindow(无底) Qt.NoDropShadowWindowHint(默认阴影边界) Qt.Tool(无任务栏， mac会直接消失 window，无问题（需每个窗体都设置，否则一起关闭））)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint | Qt.Tool)
         # 重设宽高（切换图片调用）
         # self.setStyleSheet("") 设置qss 与css基本一致 "SFLabel {background: red} "
 
         # self.sfLabel.setAutoFillBackground(True)
         # self.sfLabel.setWindowFlags(Qt.WindowStaysOnTopHint)
         # self.sfLabel.setAttribute(Qt.WA_TranslucentBackground, True)
-
-        # self.setStyleSheet("RyougiPet{background: transparent}") #设置背景透明,windows 变黑底
         # self.resize(720, 406)
+        if platform.system() == "Windows":
+            self.setAttribute(Qt.WA_TranslucentBackground, True) # mac 失效对于qwidget (也可能多出一层图？，设置后setstylesheet无效)原因未知
+        elif platform.system() == "Darwin":
+            self.setStyleSheet("RyougiPet{background: transparent}") # windows则背景为黑 设置背景透明
+
+        
 
     # mini菜单
     def mini_iconUI(self):

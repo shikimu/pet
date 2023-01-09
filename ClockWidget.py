@@ -4,7 +4,7 @@ import json
 import configparser
 import os
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap, QIcon, QPalette, QBrush, QShowEvent
+from PyQt5.QtGui import QPixmap, QIcon, QPalette, QBrush, QShowEvent, QCloseEvent
 from PyQt5.QtCore import pyqtSignal, Qt, QDateTime, QTime
 
 class ClockAddWidget(QWidget):
@@ -12,6 +12,8 @@ class ClockAddWidget(QWidget):
     clock_list = {
         
     }
+
+    config = configparser.ConfigParser()
 
     alwaysResponse = False
 
@@ -50,7 +52,7 @@ class ClockAddWidget(QWidget):
         hLayout1.addWidget(self.dateEdit)
         hLayout1.addWidget(self.onceButton)
         vLayout.addLayout(hLayout1)
-
+        self.setWindowFlags(Qt.Tool)
         self.setLayout(vLayout)
 
     def addClock(self):
@@ -87,17 +89,15 @@ class ClockAddWidget(QWidget):
             self.setWindowModality(Qt.ApplicationModal)
 
     def load_ini(self):
-        config = configparser.ConfigParser()
         config_path = r'setting/config.ini'
-        config.read(config_path)
-        if os.path.exists(config_path) and config.has_section("Response"):
-            self.alwaysResponse = (config.get('Response', 'Always') == 'True')
+        self.config.read(config_path)
+        if os.path.exists(config_path) and self.config.has_section("Response"):
+            self.alwaysResponse = (self.config.get('Response', 'Always') == 'True')
         else:
-            config.add_section("Response")    
-            config.set("Response", "Always", "True")
-            config.write(open(config_path, "w"))
-            self.alwaysResponse = True
-
+            self.config.add_section("Response")    
+            self.config.set("Response", "Always", "True")
+            self.config.write(open(config_path, "w"))
+            self.alwaysResponse = False
 
 class ClockMessageWidget(QWidget):
 
@@ -108,13 +108,9 @@ class ClockMessageWidget(QWidget):
         self.initUI()
 
     def initUI(self):
-        pass
-
-    def close(self) -> bool:
-        print('关闭')
-        return super().close()
-
-    def hide(self) -> None:
-        print('隐藏')
-        # self.end_signal.emit()
-        return super().hide()
+        self.setWindowFlags(Qt.Tool)
+    
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        print('关闭事件')
+        self.end_signal.emit()
+        return super().closeEvent(a0)

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     clockView.clock_add_signal.connect(timer.load_clock)
 
     clockMessageView = ClockMessageWidget()
-    # clockMessageView.end_signal.connect(timer.clock_stop)
+    clockMessageView.end_signal.connect(timer.clock_stop)
     timer.clock_signal.connect(clockMessageView.show)
 
     petView.show()
