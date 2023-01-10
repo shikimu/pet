@@ -156,18 +156,19 @@ class TimerThread(QThread):
             self.clock_playing = True
         self.music_path = 'music/oblivious.mp3'
         try:
-            mixer.music.load(self.music_path)
             if not mixer.music.get_busy():
+                mixer.music.load(self.music_path)
                 mixer.music.play()
         except:
             print('load music error')
             self.clock_playing = False
 
     def clock_stop(self):
-        if mixer.music.get_busy():
-            mixer.music.stop()
         self.clock_playing = False
         self.playing_time = 0
+        if mixer.music.get_busy():
+            mixer.music.stop()
+        
 
     def shutdown_change(self):
         os.system('shutdown -a')
