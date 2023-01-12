@@ -52,7 +52,7 @@ class ClockAddWidget(QWidget):
         hLayout1.addWidget(self.dateEdit)
         hLayout1.addWidget(self.onceButton)
         vLayout.addLayout(hLayout1)
-        self.setWindowFlags(Qt.Tool)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setLayout(vLayout)
 
     def addClock(self):

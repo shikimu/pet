@@ -67,8 +67,9 @@ class RyougiPet(QWidget):
         # self.base_label.setShortcutAutoRepeat(1000)
         self.setAutoFillBackground(True)
         # 背景透明
-        # Qt.FramelessWindowHint(无框) Qt.WindowStaysOnTopHint(置顶) Qt.SubWindow(无底) Qt.NoDropShadowWindowHint(默认阴影边界) Qt.Tool(无任务栏， mac会直接消失 window，无问题（需每个窗体都设置，否则一起关闭））)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint | Qt.Tool)
+        # Qt.FramelessWindowHint(无框) Qt.WindowStaysOnTopHint(置顶) Qt.SubWindow(无底) Qt.NoDropShadowWindowHint(默认阴影边界) Qt.Tool(window，无问题）)
+        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint | Qt.Tool)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         # 重设宽高（切换图片调用）
         # self.setStyleSheet("") 设置qss 与css基本一致 "SFLabel {background: red} "
 
@@ -76,6 +77,9 @@ class RyougiPet(QWidget):
         # self.sfLabel.setWindowFlags(Qt.WindowStaysOnTopHint)
         # self.sfLabel.setAttribute(Qt.WA_TranslucentBackground, True)
         # self.resize(720, 406)
+        self.shortcut = QShortcut(QKeySequence("Esc"), self)
+        self.shortcut.activated.connect(self.hide)
+
         if platform.system() == "Windows":
             self.setAttribute(Qt.WA_TranslucentBackground, True) # mac 失效对于qwidget (也可能多出一层图？，设置后setstylesheet无效)原因未知
         elif platform.system() == "Darwin":
@@ -92,9 +96,15 @@ class RyougiPet(QWidget):
         # mQuitAction.setShortcut(QKeySequence("Ctrl+Q"))
         mSetAction = QAction("设置", self, triggered=self.setting)
 
+        mShowAction = QAction("显示", self, triggered=self.show)
+
         miniMenu = QMenu(self)
+        miniMenu.addAction(mShowAction)
+        miniMenu.addSeparator()
         miniMenu.addActions([mSetAction, mQuitAction])
         mini_icon.setContextMenu(miniMenu)
+        if platform.system() == "Windows":
+            mini_icon.activated.connect(self.miniAct)
         mini_icon.show()
 
     # 右键菜单
@@ -104,9 +114,11 @@ class RyougiPet(QWidget):
         setAction = QAction("设置", self, triggered=self.setting)
         clockAction = QAction("闹钟", self, triggered=self.clock)
         quitAction = QAction("退出", self, triggered=self.quit)
+        hideAction = QAction("隐藏", self, triggered=self.hide)
         # quitAction.setShortcut(QKeySequence("Ctrl+Q"))
-        rightMenu.addActions([setAction, clockAction, quitAction])
-
+        rightMenu.addActions([setAction, clockAction])
+        rightMenu.addSeparator()
+        rightMenu.addActions([hideAction, quitAction])
         rightMenu.popup(QCursor.pos())
 
     # 鼠标按键
@@ -161,19 +173,26 @@ class RyougiPet(QWidget):
     def setting(self):
         print("设置")
         self.sfLabel.menuEnd()
-        print(self.pos())
         self.setting_signal.emit()
 
     def clock(self):
         print("设置闹钟")
         self.sfLabel.menuEnd()
-        print(self.pos())
         self.clock_signal.emit()
+
+    def miniAct(self, reason):
+        if reason == 2 or reason == 3:
+            if self.isHidden():
+                self.show()
 
     # 退出
     def quit(self):
         self.close()
         sys.exit()
+
+    def hide(self) -> None:
+        self.sfLabel.menuEnd()
+        return super().hide()
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         print('退出')
