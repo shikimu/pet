@@ -5,6 +5,7 @@ import os
 import configparser
 import platform
 
+from PIL import Image
 from SFLabel import SFLabel
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -14,12 +15,10 @@ class RyougiPet(QWidget):
 
     config = configparser.ConfigParser()
 
-    base_img = "1_new.png"
-    base_eimg = "2_new.png"
-    base_dimg = "3_new.png"
+    roleIndex = 1
 
-    width = 270
-    height = 152
+    width = 128
+    height = 128
     
     alwayResponse = False
 
@@ -34,14 +33,13 @@ class RyougiPet(QWidget):
         self.windows_rect = QApplication.desktop().screenGeometry()
         self.windows_width = self.windows_rect.width()
         self.windows_height = self.windows_rect.height() 
-
+        self.load_role_ini()
         # 位置初始化
         self.pos_now = self.pos()
 
         # self.clock = QTimer()
         # self.clock.timeout.connect(self.clock_start)
         # self.clock.start(1000)
-
         self.initUI()
         self.mini_iconUI()
 
@@ -225,6 +223,22 @@ class RyougiPet(QWidget):
             label.acceptDropDelete = True
             label.deleteTip = False
             label.deleteToAshbin = True
+
+    def load_role_ini(self):
+        config_path = r'setting/config.ini'
+        self.config.read(config_path)
+        if self.config.has_section("Role"):
+            self.roleIndex = int(self.config.get("Role", "Index"))
+        else:
+            self.config.add_section("Role")
+            self.config.set("Role", "Index", "1")
+            self.config.write(open(config_path, "w"))
+            self.roleIndex = 1
+        
+        img = Image.open(r'./Resources/Role/{}/base.png'.format(self.roleIndex))
+        self.width, self.height = img.size
+        
+
 
 
         
