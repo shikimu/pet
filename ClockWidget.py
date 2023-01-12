@@ -30,7 +30,7 @@ class ClockAddWidget(QWidget):
 
         self.setAutoFillBackground = True
         palette = QPalette()
-        palette.setBrush(QPalette.Background, QBrush(QPixmap("bg.png").scaled(300, 300, Qt.KeepAspectRatioByExpanding, Qt.FastTransformation)))
+        palette.setBrush(QPalette.Background, QBrush(QPixmap(r"Resources/Background/clock.png").scaled(300, 300, Qt.KeepAspectRatioByExpanding, Qt.FastTransformation)))
         self.setPalette(palette)
 
         vLayout = QVBoxLayout()

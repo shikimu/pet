@@ -51,10 +51,11 @@ class RyougiPet(QWidget):
         
         # 自定label使用
         self.sfLabel = SFLabel(self)
-        # 配置读取
-        self.load_ini(self.sfLabel)
 
-        self.sfLabel.baseImgSet(self.base_img, self.base_eimg, self.base_dimg)
+        # 配置读取
+        self.load_label_ini(self.sfLabel)
+
+        self.sfLabel.baseImgSet(basePath="Resources/Role/{}".format(self.roleIndex))
         self.sfLabel.baseSet(self.width, self.height)
         self.sfLabel.labelDoubelClickSig.connect(self.labelDoubelClickEvent)
         # 右键菜单
@@ -127,6 +128,11 @@ class RyougiPet(QWidget):
             print("左键")
             self.pos_now = event.globalPos() - self.pos()
             event.accept()
+            self.sfLabel.isMove = True
+            if self.sfLabel.isLeft:
+                self.sfLabel.setImage(self.sfLabel.dragLUrl)
+            else:
+                self.sfLabel.setImage(self.sfLabel.dragRUrl)
             # 拖拽光标设定，可自定义
             self.setCursor(QCursor(Qt.ClosedHandCursor))
             
@@ -136,15 +142,14 @@ class RyougiPet(QWidget):
             self.move(event.globalPos() - self.pos_now)
             # print(self.pos())
             self.x, self.y = self.pos().x, self.pos().y
-
             nowWidth = self.x() + (self.width / 2)
             if (nowWidth < (self.windows_width / 2)) and self.sfLabel.isLeft == False:
                 self.sfLabel.isLeft = True
-                self.sfLabel.setImage(self.sfLabel.eimgUrl)
+                self.sfLabel.setImage(self.sfLabel.dragLUrl)
                 print("右到左")
             elif (nowWidth >= (self.windows_width / 2)) and self.sfLabel.isLeft == True:
                 self.sfLabel.isLeft = False
-                self.sfLabel.setImage(self.sfLabel.eimgUrl)
+                self.sfLabel.setImage(self.sfLabel.dragRUrl)
                 print("左到右")
             event.accept()
 
@@ -152,6 +157,8 @@ class RyougiPet(QWidget):
     def mouseReleaseEvent(self, event: QMouseEvent):
         if Qt.LeftButton:
             self.setCursor(QCursor(Qt.ArrowCursor))
+            self.sfLabel.isMove = False
+            self.sfLabel.setImage(self.sfLabel.baseUrl, tran=self.sfLabel.isLeft)
             print("释放")
 
     # 双击事件
@@ -200,7 +207,7 @@ class RyougiPet(QWidget):
         return super().closeEvent(a0)
     
     # 配置装载
-    def load_ini(self, label: SFLabel):
+    def load_label_ini(self, label: SFLabel):
         config_path = r'setting/config.ini'
         self.config.read(config_path)
         if os.path.exists(config_path) and self.config.has_section("Delete"):

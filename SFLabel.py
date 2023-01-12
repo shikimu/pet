@@ -11,11 +11,15 @@ from PyQt5.QtCore import pyqtSignal, QEvent
 
 class SFLabel(QLabel):
 
-    imgUrl = "1_new.png"
-    eimgUrl = "2_new.png"
-    dragUrl = "3_new.png"
+    baseUrl = ""
+    respondUrl = ""
+    dragRUrl = ""
+    dragLUrl = ""
+
+    basePath = ""
 
     isLeft = False
+    isMove = False
 
     acceptDropDelete = True
     deleteTip = False
@@ -28,24 +32,28 @@ class SFLabel(QLabel):
     def __int__(self):
         super(SFLabel, self).__init__()
 
-    def baseImgSet(self, imgUrl: str, eimgUrl: str, dragUrl: str):
-        self.imgUrl = imgUrl
-        self.eimgUrl = eimgUrl
-        self.dragUrl = dragUrl
+    def baseImgSet(self, basePath: str):
+        self.basePath = basePath
+        self.baseUrl = "{}/{}".format(basePath, "base.png")
+        self.respondUrl = "{}/{}".format(basePath, "respond.png")
+        self.dragRUrl = "{}/{}".format(basePath, "dragRight.png")
+        self.dragLUrl = "{}/{}".format(basePath, "dragLeft.png")
 
     def baseSet(self, width: int = 360, height: int = 203):
         self.width = width
         self.height = height
-        self.setImage()
+        self.setImage(image=self.baseUrl)
 
     def updateImg(self, imgUrl: str):
         self.imgUrl = imgUrl
-        self.setImage()
+        self.setImage(image=self.baseUrl)
 
-    def setImage(self, image = imgUrl):
+    def setImage(self, image, tran: bool = False):
         # 使用PIL（若控件水平翻转不成，使用此水平翻转图片）
         img = Image.open(image)
-        if self.isLeft:
+
+        # 判断是否翻转（用于无差分的左右变换）
+        if tran: 
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
         qImg = ImageQt.ImageQt(img)
         pixmap = QPixmap.fromImage(qImg)
@@ -59,7 +67,7 @@ class SFLabel(QLabel):
     # 文件拖拽进入
     def dragEnterEvent(self, event: QDragEnterEvent):
         if self.acceptDropDelete:
-            self.setImage(self.dragUrl)
+            self.setImage(self.respondUrl)
             event.accept()
         else:
             event.ignore()
@@ -83,7 +91,7 @@ class SFLabel(QLabel):
                     self.deleteFile(path)
             else:
                 print("点击其他")
-                self.setImage()
+                self.setImage(image=self.baseUrl)
                 event.ignore()
         else:
             for url in event.mimeData().urls():
@@ -114,11 +122,11 @@ class SFLabel(QLabel):
             elif os.path.isfile(path):
                 print("删除文件")
                 os.remove(path)
-            self.setImage()
+            self.setImage(image=self.baseUrl)
 
     # 文件拖拽离开
     def dragLeaveEvent(self, event: QDragLeaveEvent):
-        self.setImage()
+        self.setImage(image=self.baseUrl)
     
     # 双击
     def mouseDoubleClickEvent(self, event: QMouseEvent):
@@ -128,14 +136,15 @@ class SFLabel(QLabel):
     # 鼠标进入
     def enterEvent(self, event: QEvent):
         print("label进入")
-        self.setImage(self.eimgUrl)
+        if (not self.isMove):
+            self.setImage(self.respondUrl)
     
     # 鼠标离开
     def leaveEvent(self, event: QEvent):
         print("离开")
-        if not self.isMenu:
-            self.setImage()
+        if (not self.isMenu) and (not self.isMove):
+            self.setImage(image=self.baseUrl)
 
     def menuEnd(self):
         self.isMenu = False
-        self.setImage()
+        self.setImage(image=self.baseUrl)
