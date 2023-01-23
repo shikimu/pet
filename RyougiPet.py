@@ -67,8 +67,8 @@ class RyougiPet(QWidget):
         self.setAutoFillBackground(True)
         # 背景透明
         # Qt.FramelessWindowHint(无框) Qt.WindowStaysOnTopHint(置顶) Qt.SubWindow(无底) Qt.NoDropShadowWindowHint(默认阴影边界) Qt.Tool(window，无问题）)
-        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint | Qt.Tool)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint | Qt.Tool)
+        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.NoDropShadowWindowHint)
         # 重设宽高（切换图片调用）
         # self.setStyleSheet("") 设置qss 与css基本一致 "SFLabel {background: red} "
 
@@ -94,10 +94,8 @@ class RyougiPet(QWidget):
         mQuitAction = QAction("退出", self, triggered=self.quit)
         # mQuitAction.setShortcut(QKeySequence("Ctrl+Q"))
         mSetAction = QAction("设置", self, triggered=self.setting)
-
-        mShowAction = QAction("显示", self, triggered=self.show)
-
         miniMenu = QMenu(self)
+        mShowAction = QAction("显示/隐藏", self, triggered=self.hideOrShow)
         miniMenu.addAction(mShowAction)
         miniMenu.addSeparator()
         miniMenu.addActions([mSetAction, mQuitAction])
@@ -186,9 +184,12 @@ class RyougiPet(QWidget):
         self.clock_signal.emit()
 
     def miniAct(self, reason):
-        if reason == 2 or reason == 3:
+        if reason == 3:
             if self.isHidden():
                 self.show()
+        if reason == 1:
+            if self.isHidden():
+                return
 
     # 退出
     def quit(self):
@@ -203,6 +204,12 @@ class RyougiPet(QWidget):
         print('退出')
         self.quite_signal.emit()
         return super().closeEvent(a0)
+    
+    def hideOrShow(self):
+        if self.isHidden():
+            self.show()
+        else:
+            self.hide()
     
     # 配置装载
     def load_label_ini(self, label: SFLabel):
