@@ -11,3 +11,8 @@ test/
 logs.txt
 setting/clock.json
 .DS_Store
+build/
+dist/
+pet_run.py
+pet_run.spec
+temp.py
