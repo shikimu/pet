@@ -137,13 +137,13 @@ class SFLabel(QLabel):
     def enterEvent(self, event: QEvent):
         print("label进入")
         if (not self.isMove):
-            self.setImage(self.respondUrl)
+            self.setImage(self.respondUrl, tran=self.isLeft)
     
     # 鼠标离开
     def leaveEvent(self, event: QEvent):
         print("离开")
         if (not self.isMenu) and (not self.isMove):
-            self.setImage(image=self.baseUrl)
+            self.setImage(image=self.baseUrl, tran=self.isLeft)
 
     def menuEnd(self):
         self.isMenu = False

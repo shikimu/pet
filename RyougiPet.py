@@ -21,10 +21,12 @@ class RyougiPet(QWidget):
     height = 128
     
     alwayResponse = False
+    rightPress = False
 
     setting_signal = pyqtSignal()
     clock_signal = pyqtSignal()
     quite_signal = pyqtSignal()
+    shutdown_signal = pyqtSignal()
 
     def __init__(self):
         super(RyougiPet, self).__init__()
@@ -110,10 +112,11 @@ class RyougiPet(QWidget):
         rightMenu = QMenu(self)
         setAction = QAction("设置", self, triggered=self.setting)
         clockAction = QAction("闹钟", self, triggered=self.clock)
+        shutdownAction = QAction("关机", self, triggered=self.shutdown)
         quitAction = QAction("退出", self, triggered=self.quit)
         hideAction = QAction("隐藏", self, triggered=self.hide)
         # quitAction.setShortcut(QKeySequence("Ctrl+Q"))
-        rightMenu.addActions([setAction, clockAction])
+        rightMenu.addActions([setAction, clockAction, shutdownAction])
         rightMenu.addSeparator()
         rightMenu.addActions([hideAction, quitAction])
         rightMenu.popup(QCursor.pos())
@@ -121,7 +124,6 @@ class RyougiPet(QWidget):
     # 鼠标按键
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
-            print("左键")
             self.pos_now = event.globalPos() - self.pos()
             event.accept()
             self.sfLabel.isMove = True
@@ -131,10 +133,13 @@ class RyougiPet(QWidget):
                 self.sfLabel.setImage(self.sfLabel.dragRUrl)
             # 拖拽光标设定，可自定义
             self.setCursor(QCursor(Qt.ClosedHandCursor))
+        elif event.button() == Qt.RightButton:
+            self.rightPress = True
+            event.ignore()
             
     # 鼠标移动
     def mouseMoveEvent(self, event: QMouseEvent):
-        if Qt.LeftButton:
+        if not self.rightPress:
             self.move(event.globalPos() - self.pos_now)
             # print(self.pos())
             self.x, self.y = self.pos().x, self.pos().y
@@ -142,20 +147,21 @@ class RyougiPet(QWidget):
             if (nowWidth < (self.windows_width / 2)) and self.sfLabel.isLeft == False:
                 self.sfLabel.isLeft = True
                 self.sfLabel.setImage(self.sfLabel.dragLUrl)
-                print("右到左")
+                # print("右到左")
             elif (nowWidth >= (self.windows_width / 2)) and self.sfLabel.isLeft == True:
                 self.sfLabel.isLeft = False
                 self.sfLabel.setImage(self.sfLabel.dragRUrl)
-                print("左到右")
+                # print("左到右")
             event.accept()
 
     # 鼠标释放
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if Qt.LeftButton:
-            self.setCursor(QCursor(Qt.ArrowCursor))
-            self.sfLabel.isMove = False
-            self.sfLabel.setImage(self.sfLabel.baseUrl, tran=self.sfLabel.isLeft)
-            print("释放")
+        self.setCursor(QCursor(Qt.ArrowCursor))
+        self.sfLabel.isMove = False
+        self.sfLabel.setImage(self.sfLabel.baseUrl, tran=self.sfLabel.isLeft)
+        if self.rightPress:
+            self.rightPress = False
+        print("释放")
 
     # 双击事件
     def labelDoubelClickEvent(self):
@@ -190,6 +196,11 @@ class RyougiPet(QWidget):
         if reason == 1:
             if self.isHidden():
                 return
+
+    def shutdown(self):
+        print('设置关机')
+        self.sfLabel.menuEnd()
+        self.shutdown_signal.emit()
 
     # 退出
     def quit(self):
