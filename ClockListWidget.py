@@ -3,11 +3,14 @@
 import os
 import json
 
-from PyQt5.QtCore import Qt
+from ClockWidget import ClockAddWidget
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QVBoxLayout, QTableView, QPushButton
 from PyQt5.QtGui import *
 
 class ClockListWidget(QWidget):
+    
+    clock_change_signal = pyqtSignal()
     
     clock_list = {
         "list": []
@@ -38,18 +41,20 @@ class ClockListWidget(QWidget):
         tableLayout.addWidget(self.tableView)
         buttonLayout = QVBoxLayout()
         
-        saveButton = QPushButton("保存修改")
-        saveButton.clicked.connect(self.save_change)
+        # saveButton = QPushButton("保存修改")
+        # saveButton.clicked.connect(self.save_change)
         addButton = QPushButton("添加")
         addButton.clicked.connect(self.add_clock)
         deleteButton = QPushButton("删除")
         deleteButton.clicked.connect(self.delete_clock)
+        changeButton = QPushButton("修改")
+        changeButton.clicked.connect(self.change_clock)
         nowButton = QPushButton("当前信息")
         nowButton.clicked.connect(self.showTableInfo)
         
-        buttonLayout.addWidget(saveButton)
         buttonLayout.addWidget(addButton)
         buttonLayout.addWidget(deleteButton)
+        buttonLayout.addWidget(changeButton)
         buttonLayout.addWidget(nowButton)
         
         hLayout.addLayout(tableLayout)
@@ -63,14 +68,10 @@ class ClockListWidget(QWidget):
         model.setHorizontalHeaderLabels(['时', '分', '仅一次', '备注', '音乐路径', '启用'])
         for row in range(len(self.clock_list['list'])):
             clock = self.clock_list['list'][row]
-            # a = QStandardItem("1")
-            # a.setFlags(Qt.ItemIsEnabled)
-            model.setItem(row, 0, QStandardItem( "%s"%(clock['hour'])))
-            model.setItem(row, 1, QStandardItem( "%s"%(clock['minute'])))
-            model.setItem(row, 2, QStandardItem( "%s"%(clock['once'])))
-            model.setItem(row, 3, QStandardItem( "%s"%(clock['remake'])))
-            model.setItem(row, 4, QStandardItem( "%s"%(clock['music'])))
-            model.setItem(row, 5, QStandardItem( "%s"%(clock['play'] == 'False')))
+            for index, str in enumerate(["%s"%(clock['hour']), "%s"%(clock['minute']), "%s"%(clock['once']), "%s"%(clock['remake']), "%s"%(clock['music']), "%s"%(clock['play'] == 'False')]):
+                item = QStandardItem(str)
+                item.setFlags(Qt.ItemIsSelectable)
+                model.setItem(row, index, item)
         self.tableView.setModel(model)
     
     # 装载闹钟信息
@@ -89,18 +90,27 @@ class ClockListWidget(QWidget):
     def save_clock(self):
         with open(r'setting/clock.json', "w") as outfile:
             json.dump(self.clock_list, outfile)
+            self.clock_change_signal.emit()
             
-    def save_change(self):
+    def change_clock(self):
         pass
 
     def add_clock(self):
+        addView = ClockAddWidget()
+        addView.clock_add_signal.connect(self.add_clock_list)
+        addView.show()
+    
+    def add_clock_list(self, hour: int, minute: int, once: str, remake: str, music: str, play: str):
+        self.tableView.model().rowCount()
         pass
+        
     
     def delete_clock(self):
-        path = self.tableView.selectionModel().selection().indexes()
-        del self.clock_list['list'][path[0].row()]
-        self.save_clock()
-        self.set_table()
+        rows = self.tableView.selectionModel().selectedRows()
+        if rows:
+            del self.clock_list['list'][rows[0].row()]
+            self.save_clock()
+            self.set_table()
                 
     def showTableInfo(self):
         a = QStandardItemModel(self.tableView.model())
