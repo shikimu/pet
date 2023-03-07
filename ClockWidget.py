@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
 import configparser
 import os
 from PyQt5.QtWidgets import *
@@ -17,8 +16,8 @@ class ClockAddWidget(QWidget):
 
     selectTime: QTime = QTime.currentTime()
 
-    def __init__(self):
-        super(ClockAddWidget, self).__init__()
+    def __init__(self, parent):
+        super(ClockAddWidget, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
@@ -60,7 +59,6 @@ class ClockAddWidget(QWidget):
             'music': '',
             'play': False
         }
-        self.clock_list['list'].append(clock)
         if self.onceButton.isChecked():
             value = "添加闹钟, 时间为{}:{}(仅一次)".format(self.selectTime.hour(), self.selectTime.minute())
         else:
